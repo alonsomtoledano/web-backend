@@ -20,9 +20,8 @@ const add = function(argv){
 
 //read function
 const read = function(argv){
-  obj.notes.forEach( (note, i) => {
-    if(argv.uuid == note.uuid) console.log(note);
-  })
+  const search = obj.notes.find(note => argv.uuid == note.uuid);
+  console.log(search);
 }
 
 //list function
@@ -34,17 +33,11 @@ const list = function(){
 
 //remove function
 const remove = function(argv){
-  //obj.notes.splice(0, 1, argv.uuid);
-
-  obj.notes.forEach( (note, i) => {
-    obj.notes.splice (obj.notes.indexOf(note.uuid), 1);
-    // if(argv.uuid == note.uuid) {
-    //   obj.notes.splice (obj.notes.indexOf(note.uuid), 1);
-    // }
-  })
+  const search = obj.notes.find(note => argv.uuid == note.uuid);
+  obj.notes.splice(obj.notes.indexOf(search), 1);
 }
 
-// add command
+//add command
 yargs.command({
   command: 'add',
   describe: 'add a new note',
