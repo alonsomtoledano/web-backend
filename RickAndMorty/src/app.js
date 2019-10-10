@@ -1,14 +1,14 @@
 import yargs from 'yargs';
 
-import {list} from './functions';
+import {list, view} from './functions';
 
 //list command
 yargs.command({
     command: 'list',
-    describe: 'main command to list different stuff',
+    describe: 'main command to list different character data',
     builder:{
         page:{
-            describe: 'Show characters name by page',
+            describe: 'Show name characters name by page',
             demandOption: true,
             type: 'number',
         },
@@ -24,6 +24,25 @@ yargs.command({
         }
     },
     handler: list,
-  });  
-  
+  });
+
+  //view command
+  yargs.command({
+    command: 'view',
+    describe: 'Show data information',
+    builder:{
+        page:{
+            describe: 'Page',
+            demandOption: true,
+            type: 'number',
+        },
+        name:{
+            describe: 'Show name characters name by page',
+            demandOption: true,
+            type: 'string',
+        },
+    },
+    handler: view,
+  });
+
   yargs.parse(); //initiate yargs

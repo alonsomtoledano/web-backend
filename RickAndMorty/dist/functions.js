@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.list = void 0;
+exports.view = exports.list = void 0;
 
 var _request = _interopRequireDefault(require("request"));
 
@@ -48,6 +48,24 @@ var list = function list(argv) {
       });
     });
   }
-};
+}; //view function
+
 
 exports.list = list;
+
+var view = function view(argv) {
+  var baseURL = 'https://rickandmortyapi.com/api/character/';
+  var url = "".concat(baseURL, "?page=").concat(argv.page);
+  (0, _request["default"])({
+    url: url,
+    json: true
+  }, function (error, response) {
+    response.body.results.forEach(function (elem, i) {
+      if (response.body.results[i].name == argv.name) {
+        console.log("Nombre: ".concat(response.body.results[i].name, "\nEstado: ").concat(response.body.results[i].status, "\nEspecie: ").concat(response.body.results[i].species, "\nGenero: ").concat(response.body.results[i].gender, "\nOrigen: ").concat(response.body.results[i].origin.name, "\nLocalizacion: ").concat(response.body.results[i].location.name));
+      }
+    });
+  });
+};
+
+exports.view = view;

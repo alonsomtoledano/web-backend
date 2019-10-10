@@ -33,4 +33,18 @@ const list = function(argv){
     }
 }
 
-export {list};
+//view function
+const view = function(argv){
+    const baseURL = 'https://rickandmortyapi.com/api/character/';
+    const url = `${baseURL}?page=${argv.page}`;
+
+    request({url, json: true}, (error, response) => {
+        response.body.results.forEach((elem, i) => {
+            if(response.body.results[i].name == argv.name){
+                console.log(`Nombre: ${response.body.results[i].name}\nEstado: ${response.body.results[i].status}\nEspecie: ${response.body.results[i].species}\nGenero: ${response.body.results[i].gender}\nOrigen: ${response.body.results[i].origin.name}\nLocalizacion: ${response.body.results[i].location.name}`);
+            }  
+        });
+    });
+}
+
+export {list, view};

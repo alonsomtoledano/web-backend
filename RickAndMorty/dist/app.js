@@ -9,10 +9,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 //list command
 _yargs["default"].command({
   command: 'list',
-  describe: 'main command to list different stuff',
+  describe: 'main command to list different character data',
   builder: {
     page: {
-      describe: 'Show characters name by page',
+      describe: 'Show name characters name by page',
       demandOption: true,
       type: 'number'
     },
@@ -28,6 +28,25 @@ _yargs["default"].command({
     }
   },
   handler: _functions.list
+}); //view command
+
+
+_yargs["default"].command({
+  command: 'view',
+  describe: 'Show data information',
+  builder: {
+    page: {
+      describe: 'Page',
+      demandOption: true,
+      type: 'number'
+    },
+    name: {
+      describe: 'Show name characters name by page',
+      demandOption: true,
+      type: 'string'
+    }
+  },
+  handler: _functions.view
 });
 
 _yargs["default"].parse(); //initiate yargs
