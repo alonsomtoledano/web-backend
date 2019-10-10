@@ -12,11 +12,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/cli": "^7.6.0",
-    "@babel/core": "^7.6.0",
-    "@babel/node": "^7.6.1",
-    "@babel/preset-env": "^7.6.0",
+    "@babel/cli": "^7.6.3",
+    "@babel/core": "^7.6.3",
+    "@babel/node": "^7.6.3",
+    "@babel/preset-env": "^7.6.3",
     "nodemon": "^1.19.3"
   },
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "dependencies": "0.0.1",
+    "yargs": "^14.2.0"
+  }
 }
