@@ -8,7 +8,7 @@ yargs.command({
     describe: 'main command to list different stuff',
     builder:{
         page:{
-            describe: 'Page of characters',
+            describe: 'Show characters name by page',
             demandOption: true,
             type: 'number',
         },
@@ -17,6 +17,11 @@ yargs.command({
             demandOption: false,
             type: 'string',
         },
+        status:{
+            describe: 'Search characters by status',
+            demandOption: false,
+            type: 'string',
+        }
     },
     handler: list,
   });  
