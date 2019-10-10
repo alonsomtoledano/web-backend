@@ -9,7 +9,7 @@ yargs.command({
     builder:{
         page:{
             describe: 'Page of characters',
-            demandOption: false,
+            demandOption: true,
             type: 'number',
         },
         search:{

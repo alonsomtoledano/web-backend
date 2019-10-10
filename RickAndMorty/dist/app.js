@@ -13,8 +13,13 @@ _yargs["default"].command({
   builder: {
     page: {
       describe: 'Page of characters',
-      demandOption: false,
+      demandOption: true,
       type: 'number'
+    },
+    search: {
+      describe: 'Search a character by name',
+      demandOption: false,
+      type: 'string'
     }
   },
   handler: _functions.list
