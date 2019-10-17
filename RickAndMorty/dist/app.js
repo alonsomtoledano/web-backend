@@ -6,14 +6,14 @@ var _functions = require("./functions");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-//list command
+//LIST command
 _yargs["default"].command({
   command: 'list',
   describe: 'main command to list different character data',
   builder: {
     page: {
       describe: 'Show name characters name by page',
-      demandOption: true,
+      demandOption: false,
       type: 'number'
     },
     search: {
@@ -27,26 +27,27 @@ _yargs["default"].command({
       type: 'string'
     }
   },
-  handler: _functions.list
-}); //view command
-
-
-_yargs["default"].command({
-  command: 'view',
-  describe: 'Show data information',
-  builder: {
-    page: {
-      describe: 'Page',
-      demandOption: true,
-      type: 'number'
-    },
-    name: {
-      describe: 'Show name characters name by page',
-      demandOption: true,
-      type: 'string'
-    }
-  },
-  handler: _functions.view
+  handler: function handler(argv) {
+    (0, _functions.list)(argv);
+  }
 });
+/*
+  //VIEW command
+  yargs.command({
+    command: 'view',
+    describe: 'Show data information',
+    builder:{
+        name:{
+            describe: 'Show name characters name by page',
+            demandOption: true,
+            type: 'string',
+        },
+    },
+    handler: function(argv){
+        view(argv);
+    }
+  });
+*/
 
-_yargs["default"].parse(); //initiate yargs
+
+_yargs["default"].parse();

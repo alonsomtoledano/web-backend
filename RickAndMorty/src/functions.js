@@ -1,19 +1,34 @@
 import request from 'request';
 
-//list function
-const list = function(argv){
+//-----------------------------------------------------------------------------------------------------------------------------------
+// LIST FUNCTION 
+//-----------------------------------------------------------------------------------------------------------------------------------
+const list = function(argv, url){
     const baseURL = 'https://rickandmortyapi.com/api/character/';
 
-    if (argv.search != undefined){ //search a character by name
-        const url = `${baseURL}?page=${argv.page}&name=${argv.search}`;
-
+    //-------------------------------------------------------------------------------------------------------------
+    // SEARCH BY NAME
+    //-------------------------------------------------------------------------------------------------------------
+    if (argv.search){
+        const url = `${baseURL}?page=1&name=${argv.search}`;
+        
         request({url, json: true}, (error, response) => {
             response.body.results.forEach((elem, i) => {
-                console.log(response.body.results[i].name);
+                console.log(response.body.results[i].name + "----" + url);
+
+                if(response.body.info.next != ''){
+                    let newUrl = response.body.info.next;
+                    list(argv, newUrl);
+                }
+
             });
         });
     }
-    else if (argv.status != undefined){
+
+    //-------------------------------------------------------------------------------------------------------------
+    // SEARCH BY STATUS
+    //-------------------------------------------------------------------------------------------------------------
+    else if (argv.status){
         const url = `${baseURL}?page=${argv.page}&status=${argv.status}`;
         
         request({url, json: true}, (error, response) => {
@@ -22,7 +37,11 @@ const list = function(argv){
             });
         });        
     }
-    else { //list characters
+
+    //-------------------------------------------------------------------------------------------------------------
+    // LIST ALL CHARACTERS
+    //-------------------------------------------------------------------------------------------------------------
+    else {
         const url = `${baseURL}?page=${argv.page}`;
 
         request({url, json: true}, (error, response) => {
@@ -33,7 +52,10 @@ const list = function(argv){
     }
 }
 
-//view function
+/*
+//-----------------------------------------------------------------------------------------------------------------------------------
+// VIEW FUNCTION 
+//-----------------------------------------------------------------------------------------------------------------------------------
 const view = function(argv){
     const baseURL = 'https://rickandmortyapi.com/api/character/';
     const url = `${baseURL}?page=${argv.page}`;
@@ -46,5 +68,5 @@ const view = function(argv){
         });
     });
 }
-
-export {list, view};
+*/
+export {list};

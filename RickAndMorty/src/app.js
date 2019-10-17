@@ -2,14 +2,14 @@ import yargs from 'yargs';
 
 import {list, view} from './functions';
 
-//list command
+//LIST command
 yargs.command({
     command: 'list',
     describe: 'main command to list different character data',
     builder:{
         page:{
             describe: 'Show name characters name by page',
-            demandOption: true,
+            demandOption: false,
             type: 'number',
         },
         search:{
@@ -23,26 +23,25 @@ yargs.command({
             type: 'string',
         }
     },
-    handler: list,
+    handler: function(argv){
+        list(argv);
+    }
   });
-
-  //view command
+/*
+  //VIEW command
   yargs.command({
     command: 'view',
     describe: 'Show data information',
     builder:{
-        page:{
-            describe: 'Page',
-            demandOption: true,
-            type: 'number',
-        },
         name:{
             describe: 'Show name characters name by page',
             demandOption: true,
             type: 'string',
         },
     },
-    handler: view,
+    handler: function(argv){
+        view(argv);
+    }
   });
-
-  yargs.parse(); //initiate yargs
+*/
+  yargs.parse(); 
