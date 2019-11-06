@@ -2,8 +2,17 @@ import {GraphQLServer} from 'graphql-yoga'
 import * as uuid from 'uuid'
 
 const recipeData = [];
-const authorData = [];
-const ingredientData = [];
+const authorData = [{
+    name: "Alonso",
+    email: "alonso@gmail.com",
+    recipes: [],
+    id: "b71289fa-15e6-4e59-8434-f610aaf43075"
+}];
+const ingredientData = [{
+    name: "Zanahoria",
+    recipes: [],
+    id: "4f97c828-386b-45a5-8c34-6cf282449ff3"
+}];
 
 const typeDefs = `
     type Recipe {
@@ -32,6 +41,8 @@ const typeDefs = `
         recipeList: [Recipe!]!
         authorList: [Author!]!
         ingredientList: [Ingredient!]!
+        authorRecipes(id: ID!): [Recipe!]!
+        ingredientRecipes(id: ID!): [Recipe!]!
     }
 
     type Mutation {
@@ -50,12 +61,9 @@ const resolvers = {
         },
         
         ingredients: (parent, args, ctx, info) => {
-            const result = parent.ingredients.map(element => {
-                const ingredientInfo = ingredientData.find(obj => obj.id === element);
-                return {
-                    name: ingredientInfo.name,
-                    id: ingredientInfo.id
-                }
+            const result = parent.ingredients.map(elem => {
+                const ingredientInfo = ingredientData.find(obj => obj.id === elem);
+                return ingredientInfo;
             })
             return result;
         }
@@ -70,15 +78,9 @@ const resolvers = {
 
     Ingredient: {
         recipes: (parent, args, ctx, info) => {
-            const result = parent.recipes.map(element => {
-                const recipeInfo = recipeData.find(obj => obj.id === element);
-                return {
-                    title: recipeInfo.title,
-                    id: recipeInfo.id,
-                    description: recipeInfo.description,
-                    date: recipeInfo.date,
-                    ingredients: recipeInfo.ingredients
-                }
+            const result = parent.recipes.map(elem => {
+                const recipeInfo = recipeData.find(obj => obj.id === elem);
+                return recipeInfo;
             })
             return result;
         }
@@ -101,6 +103,36 @@ const resolvers = {
             return ingredientData.map(elem => {
                 return elem;
             })
+        },
+
+        authorRecipes: (parent, args, ctx, info) => {
+            const {id} = args;
+            if (!authorData.some(obj => obj.id === id)){
+                throw new Error(`User ${id} does not exist`);
+            }
+
+            const authorObject = authorData.find(obj => obj.id === id);
+
+            const result = authorObject.recipes.map(elem => {
+                const result = recipeData.find(recipe => recipe.id === elem)
+                return result;
+            })
+            return result;
+        },
+
+        ingredientRecipes: (parent, args, ctx, info) => {
+            const {id} = args;
+            if (!ingredientData.some(obj => obj.id === id)){
+                throw new Error(`Ingredient ${id} does not exist`);
+            }
+
+            const ingredientObject = ingredientData.find(obj => obj.id === id);
+
+            const result = ingredientObject.recipes.map(elem => {
+                const result = recipeData.find(recipe => recipe.id === elem)
+                return result;
+            })
+            return result;
         }
     },
 
@@ -125,8 +157,8 @@ const resolvers = {
 
             const authorObject = authorData.find(obj => obj.id === author);
             authorObject.recipes.push(id);
-            ingredients.map(element => {
-                const ingredientInfo = ingredientData.find(obj => obj.id === element);
+            ingredients.map(elem => {
+                const ingredientInfo = ingredientData.find(obj => obj.id === elem);
                 ingredientInfo.recipes.push(id);
             })
 
