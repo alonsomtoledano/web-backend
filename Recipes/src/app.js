@@ -1,25 +1,9 @@
 import {GraphQLServer} from 'graphql-yoga'
 import * as uuid from 'uuid'
 
-const recipeData = [{
-    title: "Receta maravillosa",
-    description: "Buenisima",
-    date: 5,
-    author: "b71289fa-15e6-4e59-8434-f610aaf43075",
-    ingredients: ["4f97c828-386b-45a5-8c34-6cf282449ff3"],
-    id: "12345"
-}];
-const authorData = [{
-    name: "Alonso",
-    email: "alonso@gmail.com",
-    recipes: ["12345"],
-    id: "b71289fa-15e6-4e59-8434-f610aaf43075"
-}];
-const ingredientData = [{
-    name: "Zanahoria",
-    recipes: ["12345"],
-    id: "4f97c828-386b-45a5-8c34-6cf282449ff3"
-}];
+const recipeData = [];
+const authorData = [];
+const ingredientData = [];
 
 const typeDefs = `
     type Recipe {
