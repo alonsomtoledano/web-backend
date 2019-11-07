@@ -25,6 +25,40 @@ The process of remove a note would be done by using this command in the terminal
 ```js
 npm start -- remove --uuid="<uuid>"
 ```
+## 🍳 Recipes
+Virtual recipe database using GraphQL.
+#### Types
+- Recipe
+    - Title
+    - Description
+    - Date
+    - Author
+    - Ingredients
+    - ID
+- Author
+    - Name
+    - Email
+    - Recipes
+    - ID
+- Ingredient
+    - Name
+    - Recipes
+    - ID
+#### Queries
+- Recipe List: List of recipes.
+- Author List: List of authors.
+- Ingredient List: List of ingredients.
+- Author Recipes: Recipes of an specific author.
+- Ingredient Recipes: Recipes of with an specific ingredient.
+#### Mutations
+- Add Recipe: Add new recipe.
+- Add Author: Add new Author.
+- Add Ingredient: Add new ingredient.
+- Remove Recipe: Remove a recipe.
+- Remove Author: Remove an author.
+- Update Author: Change author information.
+- Update Recipe: Change recipe information.
+- Update Ingredient: Change ingredient information.
 ## 🥒 RickAndMorty
 Information about Rick and Morty's characters througth [RickAndMorty's API](https://rickandmortyapi.com/).
 #### List character's name

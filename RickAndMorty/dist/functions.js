@@ -12,22 +12,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 //-----------------------------------------------------------------------------------------------------------------------------------
 // LIST FUNCTION 
 //-----------------------------------------------------------------------------------------------------------------------------------
-var baseURL = 'https://rickandmortyapi.com/api/character/';
-var url = "".concat(baseURL, "?page=1&name=").concat(argv.search);
-
 var list = function list(argv, url) {
-  //const baseURL = 'https://rickandmortyapi.com/api/character/';
-  //-------------------------------------------------------------------------------------------------------------
+  var baseURL = 'https://rickandmortyapi.com/api/character/'; //-------------------------------------------------------------------------------------------------------------
   // SEARCH BY NAME
   //-------------------------------------------------------------------------------------------------------------
+
   if (argv.search) {
-    //const url = `${baseURL}?page=1&name=${argv.search}`;
+    var _url = "".concat(baseURL, "?page=1&name=").concat(argv.search);
+
+    console.log(_url);
     (0, _request["default"])({
-      url: url,
+      url: _url,
       json: true
     }, function (error, response) {
       response.body.results.forEach(function (elem, i) {
-        console.log(response.body.results[i].name + "----" + url);
+        console.log(response.body.results[i].name + "----" + _url);
 
         if (response.body.info.next != '') {
           var newUrl = response.body.info.next;
@@ -39,10 +38,10 @@ var list = function list(argv, url) {
   // SEARCH BY STATUS
   //-------------------------------------------------------------------------------------------------------------
   else if (argv.status) {
-      var _url = "".concat(baseURL, "?page=").concat(argv.page, "&status=").concat(argv.status);
+      var _url2 = "".concat(baseURL, "?page=").concat(argv.page, "&status=").concat(argv.status);
 
       (0, _request["default"])({
-        url: _url,
+        url: _url2,
         json: true
       }, function (error, response) {
         response.body.results.forEach(function (elem, i) {
@@ -53,10 +52,10 @@ var list = function list(argv, url) {
     // LIST ALL CHARACTERS
     //-------------------------------------------------------------------------------------------------------------
     else {
-        var _url2 = "".concat(baseURL, "?page=").concat(argv.page);
+        var _url3 = "".concat(baseURL, "?page=").concat(argv.page);
 
         (0, _request["default"])({
-          url: _url2,
+          url: _url3,
           json: true
         }, function (error, response) {
           response.body.results.forEach(function (elem, i) {

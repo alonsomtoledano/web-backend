@@ -1,16 +1,23 @@
 import {GraphQLServer} from 'graphql-yoga'
 import * as uuid from 'uuid'
 
-const recipeData = [];
+const recipeData = [{
+    title: "Receta maravillosa",
+    description: "Buenisima",
+    date: 5,
+    author: "b71289fa-15e6-4e59-8434-f610aaf43075",
+    ingredients: ["4f97c828-386b-45a5-8c34-6cf282449ff3"],
+    id: "12345"
+}];
 const authorData = [{
     name: "Alonso",
     email: "alonso@gmail.com",
-    recipes: [],
+    recipes: ["12345"],
     id: "b71289fa-15e6-4e59-8434-f610aaf43075"
 }];
 const ingredientData = [{
     name: "Zanahoria",
-    recipes: [],
+    recipes: ["12345"],
     id: "4f97c828-386b-45a5-8c34-6cf282449ff3"
 }];
 
@@ -20,35 +27,40 @@ const typeDefs = `
         description: String!
         date: String!
         author: Author!
-        ingredients: [Ingredient!]!
+        ingredients: [Ingredient]!
         id: ID!
     }
 
     type Author {
         name: String!
         email: String!
-        recipes: [Recipe!]!
+        recipes: [Recipe]!
         id: ID!
     }
 
     type Ingredient {
         name: String!
-        recipes: [Recipe!]!
+        recipes: [Recipe]!
         id: ID!
     }
 
     type Query {
-        recipeList: [Recipe!]!
-        authorList: [Author!]!
-        ingredientList: [Ingredient!]!
-        authorRecipes(id: ID!): [Recipe!]!
-        ingredientRecipes(id: ID!): [Recipe!]!
+        recipeList: [Recipe]!
+        authorList: [Author]!
+        ingredientList: [Ingredient]!
+        authorRecipes(id: ID!): [Recipe]!
+        ingredientRecipes(id: ID!): [Recipe]!
     }
 
     type Mutation {
         addRecipe(title: String!, description: String!, author: ID!, ingredients: [ID!]!): Recipe!
         addAuthor(name: String!, email: String!): Author!
         addIngredient(name: String!): Ingredient!
+        removeRecipe(id: ID!): String!
+        removeAuthor(id: ID!): String!
+        updateAuthor(id: ID!, name: String!, email: String!): Author!
+        updateRecipe(id: ID!, title: String!, description: String!, author: ID!, ingredients: [ID]!): Recipe!
+        updateIngredient(id: ID!, name: String!): Ingredient!
     }
 `
 
@@ -114,7 +126,7 @@ const resolvers = {
             const authorObject = authorData.find(obj => obj.id === id);
 
             const result = authorObject.recipes.map(elem => {
-                const result = recipeData.find(recipe => recipe.id === elem)
+                const result = recipeData.find(recipe => recipe.id === elem);
                 return result;
             })
             return result;
@@ -129,7 +141,7 @@ const resolvers = {
             const ingredientObject = ingredientData.find(obj => obj.id === id);
 
             const result = ingredientObject.recipes.map(elem => {
-                const result = recipeData.find(recipe => recipe.id === elem)
+                const result = recipeData.find(recipe => recipe.id === elem);
                 return result;
             })
             return result;
@@ -201,6 +213,81 @@ const resolvers = {
 
             ingredientData.push(ingredient);
             return ingredient;
+        },
+
+        removeRecipe: (parent, args, ctx, info) => {
+            const {id} = args;
+            if (!recipeData.some(obj => obj.id === id)){
+                throw new Error(`${id} recipe does not exist`);
+            }
+
+            const recipeObject = recipeData.find(obj => obj.id === id);
+            
+            recipeData.splice(recipeData.indexOf(recipeObject), 1);
+
+            return `Recipe removed`;
+        },
+
+        removeAuthor: (parent, args, ctx, info) => {
+            const {id} = args;
+            if (!authorData.some(obj => obj.id === id)){
+                throw new Error(`${id} author does not exist`);
+            }
+
+            const authorObject = authorData.find(obj => obj.id === id);
+
+            authorData.splice(authorData.indexOf(authorObject), 1);
+
+            const recipeObject = recipeData.find(obj => obj.author === id);
+            
+            if(recipeObject){
+                recipeData.splice(recipeData.indexOf(recipeObject), 1);
+            }
+
+            return `Author removed`;
+        },
+
+        updateAuthor: (parent, args, ctx, info) => {
+            const {id, name, email} = args;
+            if (!authorData.some(obj => obj.id === id)){
+                throw new Error(`${id} author does not exist`);
+            }
+
+            const authorObject = authorData.find(obj => obj.id === id);
+
+            authorObject.name = name;
+            authorObject.email = email;
+
+            return authorObject;
+        },
+
+        updateRecipe: (parent, args, ctx, info) => {
+            const {id, title, description, author, ingredients} = args;
+            if (!recipeData.some(obj => obj.id === id)){
+                throw new Error(`${id} recipe does not exist`);
+            }
+
+            const recipeObject = recipeData.find(obj => obj.id === id);
+ 
+            recipeObject.title = title;
+            recipeObject.description = description;
+            recipeObject.author = author;
+            recipeObject.ingredients = ingredients;
+
+            return recipeObject;
+        },
+
+        updateIngredient: (parent, args, ctx, info) => {
+            const {id, name} = args;
+            if (!ingredientData.some(obj => obj.id === id)){
+                throw new Error(`${id} ingredient does not exist`);
+            }
+
+            const ingredientObject = ingredientData.find(obj => obj.id === id);
+
+            ingredientObject.name = name;
+
+            return ingredientObject;
         }
     }
 }

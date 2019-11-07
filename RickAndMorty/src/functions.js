@@ -11,7 +11,7 @@ const list = function(argv, url){
     //-------------------------------------------------------------------------------------------------------------
     if (argv.search){
         const url = `${baseURL}?page=1&name=${argv.search}`;
-        
+        console.log(url);
         request({url, json: true}, (error, response) => {
             response.body.results.forEach((elem, i) => {
                 console.log(response.body.results[i].name + "----" + url);
