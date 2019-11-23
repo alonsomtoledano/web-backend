@@ -32,23 +32,25 @@ const connectToDb = async function(usr, pwd, url) {
 const runGraphQLServer = function(context) {
   const typeDefs = `
     type Query {
+      authors: [Author!]
       ingredients: [Ingredient!]
+      recipes: [Recipe!]
     }
 
     type Mutation{
       addAuthor(name: String!, email: String!): Author!
       addIngredient(name: String!): Ingredient!
       addRecipe(title: String!, description: String!, author: ID!, ingredients: [ID!]): Recipe!
-      removeAuthor(id: ID!): Author
-      removeIngredient(id: ID!): Ingredient
-      removeRecipe(id: ID!): Recipe
-      updateAuthor(id: ID!, name: String, email: String): Author!
-      updateIngredient(id: ID!, name: String!): Ingredient!
-      updateRecipe(id:ID!, title: String, description: String, author: ID, ingredients: [ID!]): Recipe!
+      removeAuthor(_id: ID!): Author
+      removeIngredient(_id: ID!): Ingredient
+      removeRecipe(_id: ID!): Recipe
+      updateAuthor(_id: ID!, name: String, email: String): Author!
+      updateIngredient(_id: ID!, name: String!): Ingredient!
+      updateRecipe(_id:ID!, title: String, description: String, author: ID, ingredients: [ID!]): Recipe!
     }
 
     type Recipe {
-      id: ID!
+      _id: ID!
       title: String!
       description: String!
       date: String!
@@ -57,25 +59,36 @@ const runGraphQLServer = function(context) {
     }
 
     type Author {
-      id: ID!
+      _id: ID!
       name: String!
       email: String!
     }
 
     type Ingredient {
-      id: ID!
+      _id: ID!
       name: String!
     }
     `;
 
   const resolvers = {
     Query: {
+      authors: async (parent, args, ctx, info) => {
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("authors");
+        return await collection.find({}).toArray();
+      },
       ingredients: async (parent, args, ctx, info) => {
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("ingredients");
-        const result = await collection.find({}).toArray();
-        return result;
+        return await collection.find({}).toArray();
+      },
+      recipes: async (parent, args, ctx, info) => {
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("recipes");
+        return await collection.find({}).toArray();
       }
     },
     Mutation: {
@@ -88,7 +101,7 @@ const runGraphQLServer = function(context) {
         const result = await collection.insertOne({ name, email });
 
         return {
-          id: result.ops[0]._id,
+          _id: result.ops[0]._id,
           name,
           email
         };
@@ -102,7 +115,7 @@ const runGraphQLServer = function(context) {
         const result = await collection.insertOne({ name });
 
         return {
-          id: result.ops[0]._id,
+          _id: result.ops[0]._id,
           name
         };
       },
@@ -120,94 +133,128 @@ const runGraphQLServer = function(context) {
         const result = await collection.insertOne({ title, description, date: `${day}/${month}/${year}`, author, ingredients });
 
         return {
-          id: result.ops[0]._id,
+          _id: result.ops[0]._id,
           title,
           description,
           date,
-          author: [],
-          ingredients: []
+          author,
+          ingredients
         };
       },
       removeAuthor: async (parent, args, ctx, info) => {
-        const { id } = args;
+        const { _id } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("authors");
-        await collection.findOneAndDelete({ _id: ObjectID(id) });
+
+        const findAuthor = await collection.findOne({ _id: ObjectID(_id) });
+        await collection.findOneAndDelete({ _id: ObjectID(_id) });
 
         const collectionRecipe = db.collection("recipes");
 
-        let findRecipe = await collectionRecipe.findOne({ author: id });
+        let findRecipe = await collectionRecipe.findOne({ author: _id });
 
         while(findRecipe){
-          await collectionRecipe.findOneAndDelete({ author: id });
-          findRecipe = await collectionRecipe.findOne({ author: id });
+          await collectionRecipe.findOneAndDelete({ author: _id });
+          findRecipe = await collectionRecipe.findOne({ author: _id });
         }
+
+        return findAuthor;
       },
       removeIngredient: async (parent, args, ctx, info) => {
-        const { id } = args;
+        const { _id } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("ingredients");
-        await collection.findOneAndDelete({ _id: ObjectID(id) });
+
+        const findIngredient = await collection.findOne({ _id: ObjectID(_id) });
+        await collection.findOneAndDelete({ _id: ObjectID(_id) });
 
         const collectionRecipe = db.collection("recipes");
 
-        let findRecipe = await collectionRecipe.findOne({ ingredients: id });
+        let findRecipe = await collectionRecipe.findOne({ ingredients: _id });
 
         while(findRecipe){
-          await collectionRecipe.findOneAndDelete({ ingredients: id });
-          findRecipe = await collectionRecipe.findOne({ ingredients: id });
+          await collectionRecipe.findOneAndDelete({ ingredients: _id });
+          findRecipe = await collectionRecipe.findOne({ ingredients: _id });
         }
+
+        return findIngredient;
       },
       removeRecipe: async (parent, args, ctx, info) => {
-        const { id } = args;
+        const { _id } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("recipes");
-        await collection.findOneAndDelete({ _id: ObjectID(id) });
+        const findRecipe = await collection.findOne({ _id: ObjectID(_id) });
+        await collection.findOneAndDelete({ _id: ObjectID(_id) });
+
+        return findRecipe;
       },
       updateAuthor: async (parent, args, ctx, info) => {
-        const { id, name, email } = args;
+        const { _id, name, email } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("authors");
 
-        const author = await collection.findOne({ _id: ObjectID(id) })
-
-        await collection.findOneAndUpdate({ _id: ObjectID(id) },
+        const author = await collection.findOne({ _id: ObjectID(_id) });
+        await collection.findOneAndUpdate({ _id: ObjectID(_id) },
           {$set: { name: name || author.name,
             email: email || author.email}});
+
+        return await collection.findOne({ _id: ObjectID(_id) });
       },
       updateIngredient: async (parent, args, ctx, info) => {
-        const { id, name } = args;
+        const { _id, name } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("ingredients");
 
-        await collection.findOneAndUpdate({ _id: ObjectID(id) }, {$set: { name: name }});
+        await collection.findOneAndUpdate({ _id: ObjectID(_id) }, {$set: { name: name }});
+
+        return await collection.findOne({ _id: ObjectID(_id) });
       },
       updateRecipe: async (parent, args, ctx, info) => {
-        const { id, title, description, author, ingredients } = args;
+        const { _id, title, description, author, ingredients } = args;
         const { client } = ctx;
         const db = client.db("recipesDatabase");
         const collection = db.collection("recipes");
 
-        const recipe = await collection.findOne({ _id: ObjectID(id) });
+        const recipe = await collection.findOne({ _id: ObjectID(_id) });
 
         const date = new Date();
         const day = date.getDate();
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
 
-        await collection.findOneAndUpdate({ _id: ObjectID(id) },
+        await collection.findOneAndUpdate({ _id: ObjectID(_id) },
           {$set: { title: title || recipe.title,
             description: description || recipe.description,
             date: `${day}/${month}/${year}`,
             author: author || recipe.author,
             ingredients: ingredients || recipe.ingredients}});
+
+        return await collection.findOne({ _id: ObjectID(_id) });
       }
-    }
+    },
+    Recipe: {
+      author: async (parent, args, ctx, info) => {
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("authors");
+        const _id = parent.author;
+
+        return await collection.findOne({ _id: ObjectID(_id) });
+      },
+      ingredients: async (parent, args, ctx, info) => {
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("ingredients");
+        const ingredients = parent.ingredients.map(elem => ObjectID(elem));
+
+        return await collection.find({ _id: { $in: ingredients } }).toArray();
+      }
+    },
   };
 
   const server = new GraphQLServer({ typeDefs, resolvers, context });
