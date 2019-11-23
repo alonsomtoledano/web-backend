@@ -42,6 +42,9 @@ const runGraphQLServer = function(context) {
       removeAuthor(id: ID!): Author
       removeIngredient(id: ID!): Ingredient
       removeRecipe(id: ID!): Recipe
+      updateAuthor(id: ID!, name: String, email: String): Author!
+      updateIngredient(id: ID!, name: String!): Ingredient!
+      updateRecipe(id:ID!, title: String, description: String, author: ID, ingredients: [ID!]): Recipe!
     }
 
     type Recipe {
@@ -107,20 +110,20 @@ const runGraphQLServer = function(context) {
         const { title, description, author, ingredients } = args;
         const { client } = ctx;
 
-        const db = client.db("recipesDatabase");
-        const collection = db.collection("recipes");
-        const result = await collection.insertOne({ title, description, author, ingredients });
-
         const date = new Date();
         const day = date.getDate();
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
 
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("recipes");
+        const result = await collection.insertOne({ title, description, date: `${day}/${month}/${year}`, author, ingredients });
+
         return {
           id: result.ops[0]._id,
           title,
           description,
-          date: `${day}/${month}/${year}`,
+          date,
           author: [],
           ingredients: []
         };
@@ -133,7 +136,13 @@ const runGraphQLServer = function(context) {
         await collection.findOneAndDelete({ _id: ObjectID(id) });
 
         const collectionRecipe = db.collection("recipes");
-        await collectionRecipe.findOneAndDelete({ author: id });
+
+        let findRecipe = await collectionRecipe.findOne({ author: id });
+
+        while(findRecipe){
+          await collectionRecipe.findOneAndDelete({ author: id });
+          findRecipe = await collectionRecipe.findOne({ author: id });
+        }
       },
       removeIngredient: async (parent, args, ctx, info) => {
         const { id } = args;
@@ -143,7 +152,13 @@ const runGraphQLServer = function(context) {
         await collection.findOneAndDelete({ _id: ObjectID(id) });
 
         const collectionRecipe = db.collection("recipes");
-        await collectionRecipe.findOneAndDelete({ ingredients: id });
+
+        let findRecipe = await collectionRecipe.findOne({ ingredients: id });
+
+        while(findRecipe){
+          await collectionRecipe.findOneAndDelete({ ingredients: id });
+          findRecipe = await collectionRecipe.findOne({ ingredients: id });
+        }
       },
       removeRecipe: async (parent, args, ctx, info) => {
         const { id } = args;
@@ -152,6 +167,46 @@ const runGraphQLServer = function(context) {
         const collection = db.collection("recipes");
         await collection.findOneAndDelete({ _id: ObjectID(id) });
       },
+      updateAuthor: async (parent, args, ctx, info) => {
+        const { id, name, email } = args;
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("authors");
+
+        const author = await collection.findOne({ _id: ObjectID(id) })
+
+        await collection.findOneAndUpdate({ _id: ObjectID(id) },
+          {$set: { name: name || author.name,
+            email: email || author.email}});
+      },
+      updateIngredient: async (parent, args, ctx, info) => {
+        const { id, name } = args;
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("ingredients");
+
+        await collection.findOneAndUpdate({ _id: ObjectID(id) }, {$set: { name: name }});
+      },
+      updateRecipe: async (parent, args, ctx, info) => {
+        const { id, title, description, author, ingredients } = args;
+        const { client } = ctx;
+        const db = client.db("recipesDatabase");
+        const collection = db.collection("recipes");
+
+        const recipe = await collection.findOne({ _id: ObjectID(id) });
+
+        const date = new Date();
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+
+        await collection.findOneAndUpdate({ _id: ObjectID(id) },
+          {$set: { title: title || recipe.title,
+            description: description || recipe.description,
+            date: `${day}/${month}/${year}`,
+            author: author || recipe.author,
+            ingredients: ingredients || recipe.ingredients}});
+      }
     }
   };
 
