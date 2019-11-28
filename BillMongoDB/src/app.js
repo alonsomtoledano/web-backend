@@ -33,7 +33,7 @@ const connectToDb = async function(usr, pwd, url) {
 const runGraphQLServer = function(context) {
   const typeDefs = `
     type Query {
-      users: String!
+      getBills(userName: String!, token: ID!): [Bill!]
     }
 
     type Mutation{
@@ -41,6 +41,7 @@ const runGraphQLServer = function(context) {
       login(userName: String!, password: String!): ID!
       logout(userName: String!, token: ID!): User!
       addBill(userName: String!, token: ID!, concept: String!, amount: Float!): Bill!
+      removeUser(userName: String!, token: ID!): User!
     }
 
     type Bill {
@@ -48,7 +49,7 @@ const runGraphQLServer = function(context) {
       date: String!
       concept: String!
       amount: Float!
-      user: ID!
+      user: User!
     }
 
     type User {
@@ -56,14 +57,25 @@ const runGraphQLServer = function(context) {
       token: ID
       userName: String!
       password: String!
-      bills: [Bill!]
     }
     `;
 
   const resolvers = {
     Query: {
-      users: async (parent, args, ctx, info) => {
-        return "Hola";
+      getBills: async (parent, args, ctx, info) => {
+        const { userName, token } = args;
+        const { client } = ctx;
+        const db = client.db("billDatabase");
+        const collectionUsers = db.collection("users");
+        const collection = db.collection("bills");
+
+        const findUser = await collectionUsers.findOne({ userName: userName });
+        
+        if(findUser.token === token){
+          return await collection.find({user: findUser._id}).toArray();
+        }
+        else
+          throw new Error("User is not logged in");
       }
     },
     Mutation: {
@@ -137,21 +149,56 @@ const runGraphQLServer = function(context) {
         const collection = db.collection("bills");
 
         const findUser = await collectionUsers.findOne({ userName: userName });
+        const userID = findUser._id;
         if(findUser.token === token){
-          const result = await collection.insertOne({ date: `${day}/${month}/${year}`, concept, amount, user: findUser._id });
+          const result = await collection.insertOne({ date: `${day}/${month}/${year}`, concept, amount, user: userID });
 
           return {
             _id: result.ops[0]._id,
             date,
             concept,
             amount,
-            user
+            user: userID
           }
+        }
+        else
+          throw new Error("User is not logged in");
+      },
+      removeUser: async (parent, args, ctx, info) => {
+        const { userName, token } = args;
+        const { client } = ctx;
+        const db = client.db("billDatabase");
+        const collectionUsers = db.collection("users");
+        const collection = db.collection("bills");
+
+        const findUser = await collectionUsers.findOne({ userName: userName });
+        
+        if(findUser.token === token){
+          await collectionUsers.findOneAndDelete({ _id: ObjectID(findUser._id) });
+
+          let findBills = await collection.findOne({ user: findUser._id });
+
+          while(findBills){
+            await collection.findOneAndDelete({ user: findUser._id });
+            findBills = await collection.findOne({ user: findUser._id });
+          }
+
+          return findUser;
         }
         else
           throw new Error("User is not logged in");
       }
     },
+    Bill: {
+      user: async (parent, args, ctx, info) => {
+        const { client } = ctx;
+        const db = client.db("billDatabase");
+        const collection = db.collection("users");
+        const _id = parent.user;
+
+        return await collection.findOne({ _id: ObjectID(_id) });
+      }
+    }
   };
 
   const server = new GraphQLServer({ typeDefs, resolvers, context });
