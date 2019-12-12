@@ -30,7 +30,7 @@ const Mutation = {
     },
     beginMatch: async (parent, args, ctx, info) => {
         const { match } = args;
-        const { client } = ctx;
+        const { client, pubsub } = ctx;
 
         const db = client.db("footballDatabase");
         const collection = db.collection("matches");
@@ -43,13 +43,21 @@ const Mutation = {
                 {$set: {in_game: true}},
                 {returnOriginal:false}
             );
+            
+            pubsub.publish(
+                match,
+                {
+                    MatchSubscription: result.value
+                }
+            );
+
             return result.value;
         }
         else throw new Error("Match does not exist or has not begun");
     },
     endMatch: async (parent, args, ctx, info) => {
         const { match } = args;
-        const { client } = ctx;
+        const { client, pubsub } = ctx;
 
         const db = client.db("footballDatabase");
         const collection = db.collection("matches");
@@ -62,13 +70,21 @@ const Mutation = {
                 {$set: {in_game: false, ended: true}},
                 {returnOriginal:false}
             );
+
+            pubsub.publish(
+                match,
+                {
+                    MatchSubscription: result.value
+                }
+            );
+
             return result.value;
         }
         else throw new Error("Match does not exist or is not playing");
     },
     updateScoreboard: async (parent, args, ctx, info) => {
         const { match, scoreboard } = args;
-        const { client } = ctx;
+        const { client, pubsub } = ctx;
 
         const db = client.db("footballDatabase");
         const collection = db.collection("matches");
@@ -81,21 +97,18 @@ const Mutation = {
                 {$set: {scoreboard}},
                 {returnOriginal:false}
             );
+
+            pubsub.publish(
+                match,
+                {
+                    MatchSubscription: result.value
+                }
+            );
+
             return result.value;
         }
         else throw new Error("Match does not exist or is not playing");
-    },
-    tellyou: (parent, args, ctx, info) => {
-        const {id, value} = args;
-        const {pubsub} = ctx;
-        pubsub.publish(
-            id,
-            {
-                tellme: value
-            }
-        );
-        return value;
-    },
+    }
 }
 
 export {Mutation as default}

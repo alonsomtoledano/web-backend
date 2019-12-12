@@ -1,11 +1,18 @@
 const Subscription = {
-    tellme: {
+    MatchSubscription: {
         subscribe(parent, args, ctx, info){
-            const {id} = args;
-            const {pubsub} = ctx;
-            return pubsub.asyncIterator(id);
+            const { match } = args;
+            const { pubsub } = ctx;
+            return pubsub.asyncIterator(match);
         }
-    }
+    },
+    TeamSubscription: {
+        subscribe(parent, args, ctx, info){
+            const { team } = args;
+            const { pubsub } = ctx;
+            return pubsub.asyncIterator(team);
+        }
+    },
 }
 
 export {Subscription as default}

@@ -8,11 +8,11 @@ type Mutation {
     beginMatch(match: ID!): Match!
     endMatch(match: ID!): Match!
     updateScoreboard(match: ID!, scoreboard: String!): Match!
-    tellyou(id: String!, value: Int!): Int!
 }
 
 type Subscription {
-    tellme(id: String!): Int!
+    MatchSubscription(match: ID!): Match!
+    TeamSubscription(team: ID!): Match!
 }
 
 type Team {
