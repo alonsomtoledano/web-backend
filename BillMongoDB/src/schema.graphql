@@ -1,0 +1,26 @@
+type Query {
+    getBills(userName: String!, token: ID!): [Bill!]
+}
+
+type Mutation{
+    addUser(userName: String!, password: String!): User!
+    login(userName: String!, password: String!): ID!
+    logout(userName: String!, token: ID!): User!
+    addBill(userName: String!, token: ID!, concept: String!, amount: Float!): Bill!
+    removeUser(userName: String!, token: ID!): User!
+}
+
+type Bill {
+    _id: ID!
+    date: String!
+    concept: String!
+    amount: Float!
+    user: User!
+}
+
+type User {
+    _id: ID!
+    token: ID
+    userName: String!
+    password: String!
+}
