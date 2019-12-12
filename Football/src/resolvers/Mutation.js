@@ -49,11 +49,26 @@ const Mutation = {
                 {
                     MatchSubscription: result.value
                 }
+                
+            );
+
+            pubsub.publish(
+                result.value.teams[0],
+                {
+                    TeamSubscription: result.value
+                }
+            );
+
+            pubsub.publish(
+                result.value.teams[1],
+                {
+                    TeamSubscription: result.value
+                }
             );
 
             return result.value;
         }
-        else throw new Error("Match does not exist or has not begun");
+        else throw new Error("Match does not exist or is playing");
     },
     endMatch: async (parent, args, ctx, info) => {
         const { match } = args;
@@ -75,6 +90,20 @@ const Mutation = {
                 match,
                 {
                     MatchSubscription: result.value
+                }
+            );
+
+            pubsub.publish(
+                result.value.teams[0],
+                {
+                    TeamSubscription: result.value
+                }
+            );
+
+            pubsub.publish(
+                result.value.teams[1],
+                {
+                    TeamSubscription: result.value
                 }
             );
 
@@ -102,6 +131,20 @@ const Mutation = {
                 match,
                 {
                     MatchSubscription: result.value
+                }
+            );
+
+            pubsub.publish(
+                result.value.teams[0],
+                {
+                    TeamSubscription: result.value
+                }
+            );
+
+            pubsub.publish(
+                result.value.teams[1],
+                {
+                    TeamSubscription: result.value
                 }
             );
 
