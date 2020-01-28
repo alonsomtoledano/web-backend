@@ -1,4 +1,4 @@
-# JSProjects
+# web-backend
 Repository where the different projects of the subject of Architecture and Programming of Systems on the Internet will be uploaded.
 ## 📝 Notes
 Virtual notes manager.
